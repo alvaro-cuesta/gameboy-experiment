@@ -1,0 +1,4 @@
+inc/midi-table.inc
+*.o
+*.gb
+*.sym
