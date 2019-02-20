@@ -8,6 +8,8 @@ wTimerCalls:
   ds 1
 wCurrentNote:
   ds 1
+wTest:
+  ds 1
 
 SECTION "VBlank Interrupt", ROM0[$0040]
   call VBlank
@@ -17,8 +19,31 @@ SECTION "VBlank", ROM0
 VBlank:
   ;ld a, [wCurrentNote]
 
-  lda [rSCY], -(SCRN_Y / 2 - TILE_SIZE / 2)
-  lda [rSCX], -(SCRN_X / 2 - TILE_SIZE / 2 * (HelloWorldStrEnd - HelloWorldStr - 1))
+  ld hl, SinTable
+  ld a, [wTest]
+  ld c, a
+  xor b
+  add hl, bc
+  
+  ld a, [hl]
+  sub a, 64
+  sub a, SCRN_Y / 2 - TILE_SIZE / 2
+  ld [rSCY], a
+
+  ld a, [wTest]
+  inc a
+  ld [wTest], a
+
+  ld hl, CosTable
+  ld a, [wTest]
+  ld c, a
+  xor b
+  add hl, bc
+  
+  ld a, [hl]
+  sub a, 32
+  sub a, SCRN_X / 2 - TILE_SIZE / 2 * (HelloWorldStrEnd - HelloWorldStr - 1)
+  ld [rSCX], a
   ret
 
 SECTION "Timer Interrupt", ROM0[$0050]
@@ -53,6 +78,7 @@ Setup:
 .variables
   xor a
   ld [wTimerCalls], a
+  ld [wTest], a
   ld [wCurrentNote], a
   ld [wCurrentNote + 1], a
 
@@ -82,29 +108,18 @@ Setup:
 
   zeroa [rLCDC], a
 
-  ; Copy font to VRAM
+.copyFont
   ld hl, _VRAM2
   ld de, FontTiles
   ld bc, FontTilesEnd - FontTiles
-
-.copyFont
-  lda [hli], [de] ; Grab 1 byte from the source, place it at the destination, incrementing hl
-  inc de ; Move to next byte
-  dec bc ; Decrement count
-  ld a, b ; Check if count is 0, since `dec bc` doesn't update flags
-  or c
-  jr nz, .copyFont
-
-DrawString:
-  ld hl, _SCRN0
-  ld de, HelloWorldStr
+  call CopyBytes
 
 .copyString
-  lda [hli], [de]
-  inc de
-  and a ; Check if the byte we just copied is zero
-  jr nz, .copyString ; Continue if it's not
+  ld hl, _SCRN0
+  ld de, HelloWorldStr
+  call CopyString
 
+.setupScreen
   lda [rBGP], (%11 << 6) | (%10 << 4) | (%01 << 2) | (%00 << 0) ; palette
 
   ; scroll
@@ -142,7 +157,7 @@ PlayNote:
 
   adda [wCurrentNote], 2
 
-  cp a, 182
+  cp a, (MidiTableEnd - MidiTable)
   jr nz, PlayNote.return
   zeroa [wCurrentNote]
 .return
@@ -158,13 +173,23 @@ SECTION "Midi Table", ROM0
 
 MidiTable:
   midiTable
+MidiTableEnd:
 
-SECTION "Sine Table", ROM0
+SECTION "Sin Table", ROM0
 
-SineTable:
+SinTable:
 ANGLE SET   0.0 
       REPT  256 
       DB    (MUL(64.0,SIN(ANGLE))+64.0)>>16 
+ANGLE SET ANGLE + 256.0 
+      ENDR
+
+SECTION "Cos Table", ROM0
+
+CosTable:
+ANGLE SET   0.0 
+      REPT  256 
+      DB    DIV((MUL(64.0,COS(ANGLE))+64.0),2.0)>>16
 ANGLE SET ANGLE + 256.0 
       ENDR
 
@@ -173,3 +198,24 @@ SECTION "Hello World string", ROM0
 HelloWorldStr:
   db "Hello World", 0
 HelloWorldStrEnd:
+
+; from [de] to [hl], 0x00 terminated
+; clobbers a
+CopyString:
+  lda [hli], [de]
+  inc de
+  and a ; check if the byte we just copied is zero
+  jr nz, CopyString
+  ret
+
+; from [de] to [hl], bc bytes
+; clobbers a
+CopyBytes:
+  lda [hli], [de]
+  inc de
+  dec bc ; count
+  or c ; check if count is 0, since `dec bc` doesn't update flags
+  jr nz, CopyBytes
+  or b
+  jr nz, CopyBytes
+  ret
