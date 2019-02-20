@@ -9,13 +9,33 @@ wTimerCalls:
 wCurrentNote:
   ds 1
 
-SECTION "VBlank", ROM0[$0040]
+SECTION "VBlank Interrupt", ROM0[$0040]
   call VBlank
   reti
 
-SECTION "Timer", ROM0[$0050]
+SECTION "VBlank", ROM0
+VBlank:
+  ;ld a, [wCurrentNote]
+
+  lda [rSCY], -(SCRN_Y / 2 - TILE_SIZE / 2)
+  lda [rSCX], -(SCRN_X / 2 - TILE_SIZE / 2 * (HelloWorldStrEnd - HelloWorldStr - 1))
+  ret
+
+SECTION "Timer Interrupt", ROM0[$0050]
   call Timer
   reti
+
+SECTION "Timer", ROM0
+Timer:
+  ld a, [wTimerCalls]
+  cp 2                      ; cada 20 interrupciones, pasa 1 seg
+  jr z, Timer.playNote
+  inc a                       ; si no, incrementamos y volvemos
+  ld [wTimerCalls], a
+  ret
+.playNote
+  call PlayNote
+  ret
 
 SECTION "Entry point", ROM0[$100]
   di
@@ -28,7 +48,7 @@ ENDR
 SECTION "Game code", ROM0
 
 Setup:
-  ld sp, $ffff
+  ld sp, $fffe
 
 .variables
   xor a
@@ -39,20 +59,31 @@ Setup:
 .timer
   lda [rTAC], TACF_START | TACF_16KHZ ; timer
 
-  ld a, 51 ; (255 - 51) / 4096 = 0.049 s
+  ld a, 51 ; (255 - 51) / 16536 = 0.049 s
   ld [rTMA], a
   ld [rTIMA], a
 
+.audio
+  lda [rAUDENA], AUDENA_ON
+  lda [rAUDTERM], AUDTERM_1_LEFT | AUDTERM_1_RIGHT
+  lda [rAUDVOL], AUDVOL_VIN_SO1_OFF | AUDVOL_VIN_SO2_OFF | (%011 << 4) | (%011 << 0) ; L | R
+
+.instrument
+  lda [rAUD1LEN], AUDLEN_DUTY_50 | %111111 ; length
+  lda [rAUD1ENV], AUDENV_DOWN | (%1111 << 4) | (%001 << 0) ; initial? + sweep?
+  lda [rAUD1SWEEP], AUDSWEEP_OFF
+
+; LCD
+
 .waitVBlank
   ld a, [rLY]
-  cp 144 ; Check if the LCD is past VBlank
+  cp SCRN_Y ; Check if the LCD is past VBlank
   jr c, .waitVBlank
 
-  xor a
-  ld [rLCDC], a
+  zeroa [rLCDC], a
 
   ; Copy font to VRAM
-  ld hl, $9000
+  ld hl, _VRAM2
   ld de, FontTiles
   ld bc, FontTilesEnd - FontTiles
 
@@ -65,7 +96,7 @@ Setup:
   jr nz, .copyFont
 
 DrawString:
-  ld hl, $9800 ; This will print the string at the top-left corner of the screen
+  ld hl, _SCRN0
   ld de, HelloWorldStr
 
 .copyString
@@ -81,17 +112,7 @@ DrawString:
   ld [rSCY], a
   ld [rSCX], a
 
-  lda [rLCDC], LCDCF_ON | LCDCF_BGON
-
-.audioSetup
-  lda [rAUDENA], AUDENA_ON
-  lda [rAUDTERM], AUDTERM_1_LEFT | AUDTERM_1_RIGHT
-  lda [rAUDVOL], AUDVOL_VIN_SO1_OFF | AUDVOL_VIN_SO2_OFF | (%011 << 4) | (%011 << 0) ; L | R
-
-.instrumentSetup
-  lda [rAUD1LEN], AUDLEN_DUTY_50 | %111111 ; length
-  lda [rAUD1ENV], AUDENV_DOWN | (%1111 << 4) | (%001 << 0) ; initial? + sweep?
-  lda [rAUD1SWEEP], AUDSWEEP_OFF
+  lda [rLCDC], LCDCF_ON | LCDCF_BGON | LCDCF_BG9800 | LCDCF_OBJOFF | LCDCF_WINOFF
 
 Main:
   call PlayNote
@@ -106,13 +127,7 @@ Main:
   nop
   jr .lockup
 
-Timer:
-  ld      a, [wTimerCalls]
-  cp      2                      ; cada 20 interrupciones, pasa 1 seg
-  jr      z, PlayNote
-  inc     a                       ; si no, incrementamos y volvemos
-  ld [wTimerCalls], a
-  ret
+
 PlayNote:
   zeroa [wTimerCalls], a
 
@@ -128,13 +143,9 @@ PlayNote:
   adda [wCurrentNote], 2
 
   cp a, 182
-  jr nz, return
+  jr nz, PlayNote.return
   zeroa [wCurrentNote]
-return:
-  ret
-
-VBlank:
-
+.return
   ret
 
 SECTION "Font", ROM0
@@ -148,7 +159,17 @@ SECTION "Midi Table", ROM0
 MidiTable:
   midiTable
 
+SECTION "Sine Table", ROM0
+
+SineTable:
+ANGLE SET   0.0 
+      REPT  256 
+      DB    (MUL(64.0,SIN(ANGLE))+64.0)>>16 
+ANGLE SET ANGLE + 256.0 
+      ENDR
+
 SECTION "Hello World string", ROM0
 
 HelloWorldStr:
-  db "Hello World!", 0
+  db "Hello World", 0
+HelloWorldStrEnd:
