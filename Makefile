@@ -12,8 +12,8 @@ ROM_MBC_TYPE = 0x00
 RAM_SIZE = 0x00
 PAD_VALUE = 0x6B
 ASM_FLAGS = -p $(PAD_VALUE) -E
-LINK_FLAGS = -m $(BUILD_DIR)/$@.mmap
-FIX_FLAGS = -v -j -t "$(ROM_TITLE)" -n $(ROM_VERSION) -m $(ROM_MBC_TYPE) -r ${RAM_SIZE} -p $(PAD_VALUE) -l 0x33
+LINK_FLAGS = -p $(PAD_VALUE) -m $(BUILD_DIR)/$@.mmap
+FIX_FLAGS = -p $(PAD_VALUE) -v -j -t "$(ROM_TITLE)" -n $(ROM_VERSION) -m $(ROM_MBC_TYPE) -r ${RAM_SIZE} -l 0x33
 
 #
 
