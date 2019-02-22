@@ -26,7 +26,7 @@ VBlank:
   ld c, a
   xor b
   add hl, bc
-  
+
   ld a, [hl]
   sub a, 64
   sub a, SCRN_Y / 2 - TILE_SIZE / 2
@@ -41,7 +41,7 @@ VBlank:
   ld c, a
   xor b
   add hl, bc
-  
+
   ld a, [hl]
   sub a, 32
   sub a, SCRN_X / 2 - TILE_SIZE / 2 * (HelloWorldStrEnd - HelloWorldStr - 1)
@@ -176,19 +176,19 @@ MidiTableEnd:
 SECTION "Sin Table", ROM0
 
 SinTable:
-ANGLE SET   0.0 
-      REPT  256 
-      DB    (MUL(64.0,SIN(ANGLE))+64.0)>>16 
-ANGLE SET ANGLE + 256.0 
+ANGLE SET   0.0
+      REPT  256
+      DB    (MUL(64.0,SIN(ANGLE))+64.0)>>16
+ANGLE SET ANGLE + 256.0
       ENDR
 
 SECTION "Cos Table", ROM0
 
 CosTable:
-ANGLE SET   0.0 
-      REPT  256 
+ANGLE SET   0.0
+      REPT  256
       DB    DIV((MUL(64.0,COS(ANGLE))+64.0),2.0)>>16
-ANGLE SET ANGLE + 256.0 
+ANGLE SET ANGLE + 256.0
       ENDR
 
 SECTION "Hello World string", ROM0
