@@ -4,10 +4,14 @@ INC_DIR = inc
 
 ROM_TITLE = Hello World!
 ROM_NAME = hello-world
-FIX_FLAGS = -v -p 0
+ROM_VERSION = 0x00
+ROM_LICENSEE = XD
+ROM_MBC_TYPE = 0x00
+RAM_SIZE = 0x00
 SOURCES = $(SRC_DIR)/*.asm
 INCS = $(INC_DIR)/*.inc
 # padding value doesn't seem to work
+FIX_FLAGS = -v -j -t "$(ROM_TITLE)" -n $(ROM_VERSION) -m $(ROM_MBC_TYPE) -r ${RAM_SIZE} -l 0x33 -p 0x6B
 
 OBJECTS = $(SOURCES:%.asm=%.o)
 
