@@ -3,6 +3,7 @@ INCLUDE "hardware.inc"
 INCLUDE "hardware-extra.inc"
 INCLUDE "midi-table.inc"
 INCLUDE "pseudo.inc"
+GLOBAL CopyBytes, CopyString ; util.asm
 
 SECTION "Variables", WRAM0
 wTimerCalls:
@@ -195,24 +196,3 @@ SECTION "Hello World string", ROM0
 HelloWorldStr:
   db "Hello World", 0
 HelloWorldStrEnd:
-
-; from [de] to [hl], 0x00 terminated
-; clobbers a
-CopyString:
-  lda [hli], [de]
-  inc de
-  and a ; check if the byte we just copied is zero
-  jr nz, CopyString
-  ret
-
-; from [de] to [hl], bc bytes
-; clobbers a
-CopyBytes:
-  lda [hli], [de]
-  inc de
-  dec bc ; count
-  or c ; check if count is 0, since `dec bc` doesn't update flags
-  jr nz, CopyBytes
-  or b
-  jr nz, CopyBytes
-  ret
