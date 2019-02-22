@@ -137,7 +137,6 @@ Main:
   ; Lock up
 .lockup
   halt
-  nop
   jr .lockup
 
 
