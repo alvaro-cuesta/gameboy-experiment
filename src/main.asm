@@ -1,7 +1,7 @@
 INCLUDE "hardware.inc"
 INCLUDE "hardware-extra.inc"
 INCLUDE "midi-table.inc"
-INCLUDE "util.inc"
+INCLUDE "pseudo.inc"
 
 SECTION "Variables", WRAM0
 wTimerCalls:
