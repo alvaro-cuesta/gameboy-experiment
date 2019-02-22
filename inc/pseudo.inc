@@ -3,7 +3,7 @@
 ; Added as needed
 
     IF !DEF(PSEUDO_INC)
-PSEUDO SET 1
+PSEUDO_INC SET 1
 
 lda : MACRO
   ld a, \2
@@ -19,7 +19,6 @@ ENDM
 zeroa : MACRO
   xor a
   ld \1, a
-  SHIFT
 ENDM
 
 ora : MACRO
