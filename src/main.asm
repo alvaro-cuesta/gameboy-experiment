@@ -1,3 +1,4 @@
+INCLUDE "gb-header.inc"
 INCLUDE "hardware.inc"
 INCLUDE "hardware-extra.inc"
 INCLUDE "midi-table.inc"
@@ -65,10 +66,6 @@ Timer:
 SECTION "Entry point", ROM0[$100]
   di
   jp Setup
-
-REPT $150 - $104
-  db 0
-ENDR
 
 SECTION "Game code", ROM0
 
