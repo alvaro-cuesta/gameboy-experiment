@@ -120,7 +120,7 @@ SECTION "Sin Table", ROM0
 SinTable:
 ANGLE SET   0.0
       REPT  256
-      DB    (MUL(64.0,SIN(ANGLE))+64.0) >> 16
+      DB    (MUL(64.0, SIN(ANGLE)) + 64.0) >> 16
 ANGLE SET ANGLE + (65536 / 256) << 16
       ENDR
 
@@ -128,7 +128,7 @@ SECTION "Cos Table", ROM0
 CosTable:
 ANGLE SET   0.0
       REPT  256
-      DB    (MUL(64.0,COS(ANGLE))+64.0) >> 16
+      DB    DIV((MUL(64.0, COS(ANGLE)) + 64.0), 2.0) >> 16
 ANGLE SET ANGLE + (65536 / 256) << 16
       ENDR
 
