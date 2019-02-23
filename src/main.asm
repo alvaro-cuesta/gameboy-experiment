@@ -121,7 +121,7 @@ SinTable:
 ANGLE SET   0.0
       REPT  256
       DB    (MUL(64.0,SIN(ANGLE))+64.0) >> 16
-ANGLE SET ANGLE + 256.0
+ANGLE SET ANGLE + (65536 / 256) << 16
       ENDR
 
 SECTION "Cos Table", ROM0
@@ -129,7 +129,7 @@ CosTable:
 ANGLE SET   0.0
       REPT  256
       DB    (MUL(64.0,COS(ANGLE))+64.0) >> 16
-ANGLE SET ANGLE + 256.0
+ANGLE SET ANGLE + (65536 / 256) << 16
       ENDR
 
 SECTION "Hello World string", ROM0
