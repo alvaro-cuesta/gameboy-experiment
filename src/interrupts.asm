@@ -29,6 +29,7 @@ VBlankHandler:
 
   ; add X offset
   ld a, [hl]
+  sra a
   sub a, 32 + SCRN_X / 2 - TILE_SIZE / 2 * (HelloWorldStrEnd - HelloWorldStr - 1)
   ld [rSCX], a
 
