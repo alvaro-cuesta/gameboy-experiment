@@ -6,7 +6,7 @@ INC_DIR = inc
 
 ROM_NAME = hello-world
 ASM_FLAGS = -p 0x00 -E
-LINK_FLAGS = -p 0x00 -m $(BUILD_DIR)/$@.mmap -n $(BUILD_DIR)/$@.sym
+LINK_FLAGS = -p 0x00 -m $@.mmap -n $@.sym
 FIX_FLAGS = -p 0x00 -v
 
 #
@@ -15,12 +15,14 @@ SOURCES = $(wildcard $(SRC_DIR)/*.asm)
 OBJECTS = $(patsubst %.asm,%.o,$(SOURCES))
 INCS = $(INC_DIR)/*.inc $(INC_DIR)/midi-table.inc
 
-all: $(ROM_NAME)
+.PHONY: all clean
 
-$(ROM_NAME): $(OBJECTS)
+all: $(BUILD_DIR)/$(ROM_NAME).gb
+
+$(BUILD_DIR)/$(ROM_NAME).gb: $(OBJECTS)
 	mkdir -p $(BUILD_DIR)
-	rgblink $(LINK_FLAGS) -o $(BUILD_DIR)/$@.gb $(OBJECTS)
-	rgbfix $(FIX_FLAGS) $(BUILD_DIR)/$@.gb
+	rgblink $(LINK_FLAGS) -o $@ $(OBJECTS)
+	rgbfix $(FIX_FLAGS) $@
 
 %.o: %.asm $(INCS) font.chr
 	rgbasm $(ASM_FLAGS) -i $(INC_DIR)/ -o $@ $<
