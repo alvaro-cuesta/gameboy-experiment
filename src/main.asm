@@ -1,9 +1,10 @@
-INCLUDE "gb-header.inc"
 INCLUDE "hardware.inc"
 INCLUDE "hardware-extra.inc"
 INCLUDE "midi-table.inc"
 INCLUDE "pseudo.inc"
+
 GLOBAL CopyBytes, CopyString ; util.asm
+EXPORT EntryPoint
 
 SECTION "Variables", WRAM0
 wTimerCalls:
@@ -13,66 +14,11 @@ wCurrentNote:
 wTest:
   ds 1
 
-SECTION "VBlank Interrupt", ROM0[$0040]
-  call VBlank
-  reti
-
-SECTION "VBlank", ROM0
-VBlank:
-  ;ld a, [wCurrentNote]
-
-  ld hl, SinTable
-  ld a, [wTest]
-  ld c, a
-  xor b
-  add hl, bc
-
-  ld a, [hl]
-  sub a, 64
-  sub a, SCRN_Y / 2 - TILE_SIZE / 2
-  ld [rSCY], a
-
-  ld a, [wTest]
-  inc a
-  ld [wTest], a
-
-  ld hl, CosTable
-  ld a, [wTest]
-  ld c, a
-  xor b
-  add hl, bc
-
-  ld a, [hl]
-  sub a, 32
-  sub a, SCRN_X / 2 - TILE_SIZE / 2 * (HelloWorldStrEnd - HelloWorldStr - 1)
-  ld [rSCX], a
-  ret
-
-SECTION "Timer Interrupt", ROM0[$0050]
-  call Timer
-  reti
-
-SECTION "Timer", ROM0
-Timer:
-  ld a, [wTimerCalls]
-  cp 2                      ; cada 20 interrupciones, pasa 1 seg
-  jr z, Timer.playNote
-  inc a                       ; si no, incrementamos y volvemos
-  ld [wTimerCalls], a
-  ret
-.playNote
-  call PlayNote
-  ret
-
-SECTION "Entry point", ROM0[$100]
-  di
-  jp Setup
-
-SECTION "Game code", ROM0
-
-Setup:
+SECTION "Game Code", ROM0
+EntryPoint::
   ld sp, $fffe
 
+Setup:
 .variables
   xor a
   ld [wTimerCalls], a
@@ -121,7 +67,7 @@ Setup:
   lda [rBGP], (%11 << 6) | (%10 << 4) | (%01 << 2) | (%00 << 0) ; palette
 
   ; scroll
-  ld a, -10
+  ld a, 0
   ld [rSCY], a
   ld [rSCX], a
 

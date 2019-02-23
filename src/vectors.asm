@@ -1,8 +1,9 @@
+INCLUDE "hardware-extra.inc"
 INCLUDE "pseudo.inc"
 
 EXPORT CopyString, CopyBytes
 
-SECTION "CopyString", ROM0
+SECTION "CopyString", ROM0[RST0]
 ; from [de] to [hl], 0x00 terminated
 ; clobbers a
 CopyString::
@@ -12,7 +13,7 @@ CopyString::
   jr nz, CopyString
   ret
 
-SECTION "CopyBytes", ROM0
+SECTION "CopyBytes", ROM0[RST1]
 ; from [de] to [hl], bc bytes
 ; clobbers a
 CopyBytes::

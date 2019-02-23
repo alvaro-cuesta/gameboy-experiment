@@ -27,4 +27,18 @@ ora : MACRO
   ld \1, a
 ENDM
 
+inca : MACRO
+  ld a, \1
+  inc a
+  ld \1, a
+ENDM
+
+addhla : MACRO
+  add a, l
+  ld l, a
+  adc a, h
+  sub l
+  ld h, a
+ENDM
+
 ENDC ; PSEUDO_INC
