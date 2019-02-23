@@ -107,19 +107,16 @@ PlayNote:
   ret
 
 SECTION "Font", ROM0
-
 FontTiles:
 INCBIN "font.chr"
 FontTilesEnd:
 
 SECTION "Midi Table", ROM0
-
 MidiTable:
   midiTable
 MidiTableEnd:
 
 SECTION "Sin Table", ROM0
-
 SinTable:
 ANGLE SET   0.0
       REPT  256
@@ -128,7 +125,6 @@ ANGLE SET ANGLE + 256.0
       ENDR
 
 SECTION "Cos Table", ROM0
-
 CosTable:
 ANGLE SET   0.0
       REPT  256
@@ -137,7 +133,6 @@ ANGLE SET ANGLE + 256.0
       ENDR
 
 SECTION "Hello World string", ROM0
-
 HelloWorldStr:
   db "Hello World", 0
 HelloWorldStrEnd:
