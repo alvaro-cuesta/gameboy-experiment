@@ -12,6 +12,9 @@ SECTION "Timer ISR", ROM0[ISR_TIMER]
 
 SECTION "VBlank Handler", ROM0
 VBlankHandler:
+  push af
+  push hl
+
   ; hl = [SinTable + wTest]
   ld hl, SinTable
   ld a, [wTest]
@@ -34,16 +37,25 @@ VBlankHandler:
   ld [rSCX], a
 
   inca [wTest]
+
+  pop hl
+  pop af
   ret
 
 SECTION "Timer Handler", ROM0
 TimerHandler:
+  push af
+
   ld a, [wTimerCalls]
   cp 2
   jr nz, TimerHandler.skip
   call PlayNote
+
+  pop af
   ret
 .skip
   inc a
   ld [wTimerCalls], a
+
+  pop af
   ret
