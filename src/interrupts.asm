@@ -3,17 +3,23 @@ INCLUDE "hardware-extra.inc"
 INCLUDE "pseudo.inc"
 
 SECTION "VBlank ISR", ROM0[ISR_VBLANK]
-  call VBlankHandler
-  reti
+  jp VBlankHandler
 
 SECTION "Timer ISR", ROM0[ISR_TIMER]
-  call TimerHandler
+  jp TimerHandler
+
+SECTION "LCD ISR", ROM0[ISR_LCD]
+  ; invert palette (needs STATF_LYC enabled and rLYC set to window line start)
+  lda [rBGP], %00011011
   reti
 
 SECTION "VBlank Handler", ROM0
 VBlankHandler:
   push af
   push hl
+
+  ; reset palette for next frame (see LCDHandler)
+  lda [rBGP], %11100100
 
   ; hl = [SinTable + wTest]
   ld hl, SinTable
@@ -22,7 +28,7 @@ VBlankHandler:
 
   ; add Y offset
   ld a, [hl]
-  sub a, 64 + SCRN_Y / 2 - TILE_SIZE / 2
+  sub a, 56 + SCRN_Y / 2 - TILE_SIZE / 2
   ld [rSCY], a
 
   ; hl = [CosTable + wTest]
@@ -39,7 +45,7 @@ VBlankHandler:
 
   pop hl
   pop af
-  ret
+  reti
 
 SECTION "Timer Handler", ROM0
 TimerHandler:
@@ -51,10 +57,10 @@ TimerHandler:
   call PlayNote
 
   pop af
-  ret
+  reti
 .skip
   inc a
   ld [wTimerCalls], a
 
   pop af
-  ret
+  reti

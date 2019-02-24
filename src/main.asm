@@ -58,26 +58,39 @@ Setup:
   ld bc, FontTilesEnd - FontTiles
   call CopyBytes
 
-.copyString
+.copyHelloWorld
   ld hl, _SCRN0
   ld de, HelloWorldStr
   call CopyString
 
+.copyWaiting
+  ld hl, _SCRN1 + 1
+  ld de, WaitingStr
+  call CopyString
+
 .setupScreen
-  lda [rBGP], (%11 << 6) | (%10 << 4) | (%01 << 2) | (%00 << 0) ; palette
+  lda [rBGP], %11100100 ; palette
 
   ; scroll
   ld a, 0
   ld [rSCY], a
   ld [rSCX], a
+  lda [rWY], SCRN_Y - TILE_SIZE - 1
+  lda [rWX], 7 - (TILE_SIZE / 2)
 
-  lda [rLCDC], LCDCF_ON | LCDCF_BGON | LCDCF_BG9800 | LCDCF_OBJOFF | LCDCF_WINOFF
+  lda [rLYC], SCRN_Y - TILE_SIZE - 2
+
+  lda [rLCDC], LCDCF_ON | \
+    LCDCF_BGON | LCDCF_BG9800 | \
+    LCDCF_WINON | LCDCF_WIN9C00 | \
+    LCDCF_OBJOFF
 
 Main:
   call PlayNote
 
 .enableInterrupts
-  lda [rIE], IEF_TIMER | IEF_VBLANK
+  lda [rIE], IEF_TIMER | IEF_VBLANK | IEF_LCDC
+  lda [rSTAT], STATF_LYC
   ei
 
   ; Lock up
@@ -120,7 +133,7 @@ SECTION "Sin Table", ROM0
 SinTable:
 ANGLE SET   0.0
       REPT  256
-      DB    (MUL(64.0, SIN(ANGLE)) + 64.0) >> 16
+      DB    (MUL(60.0, SIN(ANGLE)) + 60.0) >> 16
 ANGLE SET ANGLE + (65536 / 256) << 16
       ENDR
 
@@ -132,7 +145,11 @@ ANGLE SET   0.0
 ANGLE SET ANGLE + (65536 / 256) << 16
       ENDR
 
-SECTION "Hello World string", ROM0
+SECTION "Strings", ROM0
 HelloWorldStr:
   db "Hello World", 0
 HelloWorldStrEnd:
+WaitingStr:
+  db "Waiting for peer...", 0
+ConnectedStr:
+  db "Connected to peer!", 0
