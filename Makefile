@@ -6,7 +6,7 @@ INC_DIR = inc
 
 ROM_NAME = hello-world
 ASM_FLAGS = -p 0x00 -E
-LINK_FLAGS = -p 0x00 -m $@.mmap -n $@.sym
+LINK_FLAGS = -p 0x00 -m $(basename $@).mmap -n $(basename $@).sym
 FIX_FLAGS = -p 0x00 -v
 
 #
@@ -28,7 +28,7 @@ $(BUILD_DIR)/$(ROM_NAME).gb: $(OBJECTS)
 	rgbasm $(ASM_FLAGS) -i $(INC_DIR)/ -o $@ $<
 
 $(INC_DIR)/midi-table.inc: $(INC_DIR)/generate-midi-table.js
-	$(INC_DIR)/generate-midi-table.js > $(INC_DIR)/midi-table.inc
+	$< > $@
 
 clean:
 	rm $(BUILD_DIR)/* $(OBJECTS) $(INC_DIR)/midi-table.inc
