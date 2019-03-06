@@ -8,12 +8,32 @@ INCLUDE "pseudo.inc"
 GLOBAL CopyBytes, CopyString ; util.asm
 EXPORT EntryPoint
 
+BUTTON_A_BIT       EQU 0
+BUTTON_B_BIT       EQU 1
+BUTTON_SELECT_BIT  EQU 2
+BUTTON_START_BIT   EQU 3
+DPAD_RIGHT_BIT     EQU 4
+DPAD_LEFT_BIT      EQU 5
+DPAD_UP_BIT        EQU 6
+DPAD_DOWN_BIT      EQU 7
+
+BUTTON_A_MASK      EQU %00000001
+BUTTON_B_MASK      EQU %00000010
+BUTTON_SELECT_MASK EQU %00000100
+BUTTON_START_MASK  EQU %00001000
+DPAD_RIGHT_MASK    EQU %00010000
+DPAD_LEFT_MASK     EQU %00100000
+DPAD_UP_MASK       EQU %01000000
+DPAD_DOWN_MASK     EQU %10000000
+
 SECTION "Variables", WRAM0
 wTimerCalls:
   ds 1
 wCurrentNote:
   ds 1
 wTest:
+  ds 1
+wP1:
   ds 1
 
 SECTION "Game Code", ROM0
@@ -65,9 +85,12 @@ Setup:
   ld de, HelloWorldStr
   call CopyString
 
-.copyWaiting
+.copyHelp
   ld hl, _SCRN1 + 1
-  ld de, WaitingStr
+  ld de, Help1Str
+  call CopyString
+  ld hl, _SCRN1 + 1 + SCRN_VX_B
+  ld de, Help2Str
   call CopyString
 
 .setupScreen
@@ -77,10 +100,10 @@ Setup:
   ld a, 0
   ld [rSCY], a
   ld [rSCX], a
-  lda [rWY], SCRN_Y - TILE_SIZE - 1
+  lda [rWY], SCRN_Y - 2 * TILE_SIZE - 1
   lda [rWX], 7 - (TILE_SIZE / 2)
 
-  lda [rLYC], SCRN_Y - TILE_SIZE - 2
+  lda [rLYC], SCRN_Y - 2 * TILE_SIZE - 3
 
   lda [rLCDC], LCDCF_ON | \
     LCDCF_BGON | LCDCF_BG9800 | \
@@ -95,10 +118,38 @@ Main:
   lda [rSTAT], STATF_LYC
   ei
 
-  ; Lock up
-.lockup
+  ; Main screen
+.checkButtons
   halt
-  jr .lockup
+  ld hl, wP1
+
+.checkServerButton
+  bit BUTTON_A_BIT, [hl]
+  jr z, .checkClientButton
+.startServer
+  ld hl, _SCRN1 + 1
+  ld de, ServerWaitingStr
+  call CopyString
+  ld hl, _SCRN1 + 1 + SCRN_VX_B
+  ld de, EmptyStr
+  call CopyString
+.waitServer
+  halt
+  jr .waitServer
+
+.checkClientButton
+  bit BUTTON_B_BIT, [hl]
+  jr z, .checkButtons
+.startClient
+  ld hl, _SCRN1 + 1
+  ld de, ClientConnectingStr
+  call CopyString
+  ld hl, _SCRN1 + 1 + SCRN_VX_B
+  ld de, EmptyStr
+  call CopyString
+.waitClient
+  halt
+  jr .waitClient
 
 
 PlayNote:
@@ -135,7 +186,7 @@ SECTION "Sin Table", ROM0
 SinTable:
 ANGLE SET   0.0
       REPT  256
-      DB    (MUL(60.0, SIN(ANGLE)) + 60.0) >> 16
+      DB    (MUL(56.0, SIN(ANGLE)) + 56.0) >> 16
 ANGLE SET ANGLE + (65536 / 256) << 16
       ENDR
 
@@ -151,7 +202,18 @@ SECTION "Strings", ROM0
 HelloWorldStr:
   db "Hello World", 0
 HelloWorldStrEnd:
-WaitingStr:
+Help1Str:
+  db "(A) Server", 0
+Help2Str:
+  db "(B) Client", 0
+EmptyStr:
+REPT SCRN_VX_B
+  db " "
+ENDR
+  db 0
+ServerWaitingStr:
   db "Waiting for peer...", 0
+ClientConnectingStr:
+  db "Connecting...", 0
 ConnectedStr:
   db "Connected to peer!", 0

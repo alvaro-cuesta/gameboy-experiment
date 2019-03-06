@@ -28,7 +28,7 @@ VBlankHandler:
 
   ; add Y offset
   ld a, [hl]
-  sub a, 56 + SCRN_Y / 2 - TILE_SIZE / 2
+  sub a, 48 + SCRN_Y / 2 - TILE_SIZE / 2
   ld [rSCY], a
 
   ; hl = [CosTable + wTest]
@@ -42,6 +42,23 @@ VBlankHandler:
   ld [rSCX], a
 
   inca [wTest]
+
+.readJoypad
+  ld hl, rP1
+  ld [hl], P1_READ_DPAD
+  ld a, [hl]
+  swap a
+  and %11110000 ; high nibble
+  ld b, a
+
+  ld [hl], P1_READ_BUTTONS
+  ld a, [hl]
+  and %00001111 ; low nibble
+  or b
+
+  cpl ; make 1 = active button
+  ld [hl], P1_READ_NOTHING
+  ld [wP1], a
 
   pop hl
   pop af
