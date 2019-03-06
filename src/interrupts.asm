@@ -9,9 +9,7 @@ SECTION "Timer ISR", ROM0[ISR_TIMER]
   jp TimerHandler
 
 SECTION "LCD ISR", ROM0[ISR_LCD]
-  ; invert palette (needs STATF_LYC enabled and rLYC set to window line start)
-  lda [rBGP], %00011011
-  reti
+  jp LCDHandler
 
 SECTION "VBlank Handler", ROM0
 VBlankHandler:
@@ -81,5 +79,13 @@ TimerHandler:
   inc a
   ld [wTimerCalls], a
 
+  pop af
+  reti
+
+SECTION "LCD Handler", ROM0
+LCDHandler:
+  ; invert palette (needs STATF_LYC enabled and rLYC set to window line start)
+  push af
+  lda [rBGP], %00011011
   pop af
   reti
