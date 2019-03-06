@@ -16,6 +16,7 @@ SECTION "LCD ISR", ROM0[ISR_LCD]
 SECTION "VBlank Handler", ROM0
 VBlankHandler:
   push af
+  push bc
   push hl
 
   ; reset palette for next frame (see LCDHandler)
@@ -61,6 +62,7 @@ VBlankHandler:
   ld [wP1], a
 
   pop hl
+  pop bc
   pop af
   reti
 
