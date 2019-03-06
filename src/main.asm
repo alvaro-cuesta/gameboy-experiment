@@ -3,6 +3,8 @@ INCLUDE "hardware-extra.inc"
 INCLUDE "midi-table.inc"
 INCLUDE "pseudo.inc"
 
+  rev_Check_hardware_inc 2.8
+
 GLOBAL CopyBytes, CopyString ; util.asm
 EXPORT EntryPoint
 
@@ -36,12 +38,12 @@ Setup:
 .audio
   lda [rAUDENA], AUDENA_ON
   lda [rAUDTERM], AUDTERM_1_LEFT | AUDTERM_1_RIGHT
-  lda [rAUDVOL], AUDVOL_VIN_SO1_OFF | AUDVOL_VIN_SO2_OFF | (%011 << 4) | (%011 << 0) ; L | R
+  lda [rAUDVOL], (%011 << 4) | (%011 << 0) ; L | R
 
 .instrument
   lda [rAUD1LEN], AUDLEN_DUTY_50 | %111111 ; length
   lda [rAUD1ENV], AUDENV_DOWN | (%1111 << 4) | (%001 << 0) ; initial? + sweep?
-  lda [rAUD1SWEEP], AUDSWEEP_OFF
+  zeroa [rAUD1SWEEP]
 
 ; LCD
 
