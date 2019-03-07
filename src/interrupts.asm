@@ -43,19 +43,20 @@ VBlankHandler:
   inca [wTest]
 
 .readJoypad
+  ld c, LOW(rP1)
   ; high nibble = d-pad
-  lda [rP1], P1_READ_DPAD
+  lda [$ff00+c], P1_READ_DPAD
 REPT 6
-  ld a, [rP1]
+  ld a, [$ff00+c]
 ENDR
   swap a
   and %11110000
   ld b, a
 
   ; low nibble = buttons
-  lda [rP1], P1_READ_BUTTONS
+  lda [$ff00+c], P1_READ_BUTTONS
 REPT 6
-  ld a, [rP1]
+  ld a, [$ff00+c]
 ENDR
   and %00001111
   or b
@@ -64,7 +65,7 @@ ENDR
   ld [wP1], a ; write to RAM
 
   ; unselect joypad lines
-  lda [rP1], P1_READ_NOTHING
+  lda [$ff00+c], P1_READ_NOTHING
 
   pop hl
   pop bc
