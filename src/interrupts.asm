@@ -45,13 +45,17 @@ VBlankHandler:
 .readJoypad
   ld hl, rP1
   ld [hl], P1_READ_DPAD
+REPT 6
   ld a, [hl]
+ENDR
   swap a
   and %11110000 ; high nibble
   ld b, a
 
   ld [hl], P1_READ_BUTTONS
+REPT 6
   ld a, [hl]
+ENDR
   and %00001111 ; low nibble
   or b
 
@@ -67,18 +71,24 @@ VBlankHandler:
 SECTION "Timer Handler", ROM0
 TimerHandler:
   push af
+  push bc
+  push hl
 
   ld a, [wTimerCalls]
   cp 2
   jr nz, TimerHandler.skip
   call PlayNote
 
+  pop hl
+  pop bc
   pop af
   reti
 .skip
   inc a
   ld [wTimerCalls], a
 
+  pop hl
+  pop bc
   pop af
   reti
 
