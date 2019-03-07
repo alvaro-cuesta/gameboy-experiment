@@ -50,7 +50,7 @@ REPT 6
   ld a, [$ff00+c]
 ENDR
   swap a
-  and %11110000
+  or %00001111
   ld b, a
 
   ; low nibble = buttons
@@ -58,10 +58,9 @@ ENDR
 REPT 6
   ld a, [$ff00+c]
 ENDR
-  and %00001111
-  or b
+  or %11110000
+  xor b ; make 1 = active button thanks to ors
 
-  cpl ; make 1 = active button
   ld [wP1], a ; write to RAM
 
   ; unselect joypad lines
