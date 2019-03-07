@@ -26,27 +26,34 @@ DPAD_LEFT_MASK     EQU %00100000
 DPAD_UP_MASK       EQU %01000000
 DPAD_DOWN_MASK     EQU %10000000
 
+STACK_SIZE         EQU $40
+
 SECTION "Variables", WRAM0
-wTimerCalls:
+hTimerCalls:
   ds 1
-wCurrentNote:
+hCurrentNote:
   ds 1
-wTest:
+hTest:
   ds 1
-wP1:
+hP1:
   ds 1
+
+SECTION "Stack", WRAM0
+wStackTop:
+    ds STACK_SIZE
+wStackBottom:
 
 SECTION "Game Code", ROM0
 EntryPoint::
-  ld sp, $fffe
+  ld sp, wStackBottom
 
 Setup:
 .variables
   xor a
-  ld [wTimerCalls], a
-  ld [wTest], a
-  ld [wCurrentNote], a
-  ld [wCurrentNote + 1], a
+  ld [hTimerCalls], a
+  ld [hTest], a
+  ld [hCurrentNote], a
+  ld [hCurrentNote + 1], a
 
 .timer
   lda [rTAC], TACF_START | TACF_16KHZ ; timer
@@ -121,7 +128,7 @@ Main:
   ; Main screen
 .checkButtons
   halt
-  ld hl, wP1
+  ld hl, hP1
 
 .checkServerButton
   bit BUTTON_A_BIT, [hl]
@@ -153,22 +160,22 @@ Main:
 
 
 PlayNote:
-  zeroa [wTimerCalls], a
+  zeroa [hTimerCalls], a
 
   ; freq
   ld hl, MidiTable
-  lda c, [wCurrentNote]
+  lda c, [hCurrentNote]
   xor b
   add hl, bc
 
   lda [rAUD1LOW], [hl+] ; LSB
   ora [rAUD1HIGH], AUDHIGH_RESTART, [hl] ; MSB
 
-  adda [wCurrentNote], 2
+  adda [hCurrentNote], 2
 
   cp a, (MidiTableEnd - MidiTable)
   jr nz, PlayNote.return
-  zeroa [wCurrentNote]
+  zeroa [hCurrentNote]
 .return
   ret
 

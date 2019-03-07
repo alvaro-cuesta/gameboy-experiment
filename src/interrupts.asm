@@ -20,9 +20,9 @@ VBlankHandler:
   ; reset palette for next frame (see LCDHandler)
   lda [rBGP], %11100100
 
-  ; hl = [SinTable + wTest]
+  ; hl = [SinTable + hTest]
   ld hl, SinTable
-  ld a, [wTest]
+  ld a, [hTest]
   addhla
 
   ; add Y offset
@@ -30,9 +30,9 @@ VBlankHandler:
   sub a, 48 + SCRN_Y / 2 - TILE_SIZE / 2
   ld [rSCY], a
 
-  ; hl = [CosTable + wTest]
+  ; hl = [CosTable + hTest]
   ld hl, CosTable
-  ld a, [wTest]
+  ld a, [hTest]
   addhla
 
   ; add X offset
@@ -40,7 +40,7 @@ VBlankHandler:
   sub a, 32 + SCRN_X / 2 - TILE_SIZE / 2 * (HelloWorldStrEnd - HelloWorldStr - 1)
   ld [rSCX], a
 
-  inca [wTest]
+  inca [hTest]
 
 .readJoypad
   ld c, LOW(rP1)
@@ -61,7 +61,7 @@ ENDR
   or %11110000
   xor b ; make 1 = active button thanks to ors
 
-  ld [wP1], a ; write to RAM
+  ld [hP1], a ; write to RAM
 
   ; unselect joypad lines
   lda [$ff00+c], P1_READ_NOTHING
@@ -77,7 +77,7 @@ TimerHandler:
   push bc
   push hl
 
-  ld a, [wTimerCalls]
+  ld a, [hTimerCalls]
   cp 2
   jr nz, TimerHandler.skip
   call PlayNote
@@ -88,7 +88,7 @@ TimerHandler:
   reti
 .skip
   inc a
-  ld [wTimerCalls], a
+  ld [hTimerCalls], a
 
   pop hl
   pop bc
