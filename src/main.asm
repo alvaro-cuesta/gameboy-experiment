@@ -1,3 +1,4 @@
+INCLUDE "debug.inc"
 INCLUDE "hardware.inc"
 INCLUDE "hardware-extra.inc"
 INCLUDE "midi-table.inc"
