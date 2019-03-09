@@ -2,19 +2,18 @@ INCLUDE "hardware.inc"
 INCLUDE "hardware-extra.inc"
 INCLUDE "pseudo.inc"
 
+INTERRUPT: macro
+SECTION "\1 ISR", ROM0[ISR_\1]
+  jp \1_Handler
+
+SECTION "\1 Handler", ROM0
+\1_Handler:
+ENDM
+
 GLOBAL hTimerCalls, hTest, hP1 ; hram.asm
 
-SECTION "VBlank ISR", ROM0[ISR_VBLANK]
-  jp VBlankHandler
-
-SECTION "Timer ISR", ROM0[ISR_TIMER]
-  jp TimerHandler
-
-SECTION "LCD ISR", ROM0[ISR_LCD]
-  jp LCDHandler
-
-SECTION "VBlank Handler", ROM0
-VBlankHandler:
+;
+  INTERRUPT VBLANK
   push af
   push bc
   push hl
@@ -73,15 +72,14 @@ ENDR
   pop af
   reti
 
-SECTION "Timer Handler", ROM0
-TimerHandler:
+  INTERRUPT TIMER
   push af
   push bc
   push hl
 
   ld a, [hTimerCalls]
   cp 2
-  jr nz, TimerHandler.skip
+  jr nz, .skip
   call PlayNote
 
   pop hl
@@ -97,8 +95,8 @@ TimerHandler:
   pop af
   reti
 
-SECTION "LCD Handler", ROM0
-LCDHandler:
+;
+  INTERRUPT LCD
   ; invert palette (needs STATF_LYC enabled and rLYC set to window line start)
   push af
   lda [rBGP], %00011011
