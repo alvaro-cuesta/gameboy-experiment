@@ -30,7 +30,7 @@ DPAD_DOWN_MASK     EQU %10000000
 
 STACK_SIZE         EQU $40
 
-SECTION "Variables", WRAM0
+SECTION "Variables", HRAM
 hTimerCalls:
   ds 1
 hCurrentNote:
