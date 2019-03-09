@@ -11,7 +11,7 @@ FIX_FLAGS = -p 0x00 -v
 
 #
 
-SOURCES = $(wildcard $(SRC_DIR)/*.asm)
+SOURCES = $(shell find $(SRC_DIR) -type f -name '*.asm')
 OBJECTS = $(patsubst %.asm,%.o,$(SOURCES))
 INCS = $(INC_DIR)/*.inc $(INC_DIR)/midi-table.inc
 

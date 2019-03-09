@@ -8,6 +8,9 @@ INCLUDE "util.inc"
   rev_Check_hardware_inc 2.8
 
 GLOBAL CopyBytes, CopyString ; util.asm
+GLOBAL hTimerCalls, hCurrentNote, hTest, hP1 ; hram.asm
+GLOBAL wStackBottom ; wram.asm
+
 EXPORT EntryPoint
 
 BUTTON_A_BIT       EQU 0
@@ -27,23 +30,6 @@ DPAD_RIGHT_MASK    EQU %00010000
 DPAD_LEFT_MASK     EQU %00100000
 DPAD_UP_MASK       EQU %01000000
 DPAD_DOWN_MASK     EQU %10000000
-
-STACK_SIZE         EQU $40
-
-SECTION "Variables", HRAM
-hTimerCalls:
-  ds 1
-hCurrentNote:
-  ds 1
-hTest:
-  ds 1
-hP1:
-  ds 1
-
-SECTION "Stack", WRAM0
-wStackTop:
-    ds STACK_SIZE
-wStackBottom:
 
 SECTION "Game Code", ROM0
 EntryPoint::

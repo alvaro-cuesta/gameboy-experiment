@@ -2,6 +2,8 @@ INCLUDE "hardware.inc"
 INCLUDE "hardware-extra.inc"
 INCLUDE "pseudo.inc"
 
+GLOBAL hTimerCalls, hTest, hP1 ; hram.asm
+
 SECTION "VBlank ISR", ROM0[ISR_VBLANK]
   jp VBlankHandler
 

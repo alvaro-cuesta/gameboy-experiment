@@ -31,4 +31,11 @@ SECTION "\1 Vector", ROM0[\2]
 \1::
 ENDM
 
+VARIABLE: MACRO
+EXPORT \1
+
+SECTION "\1 \2 Variable", \2
+\1:
+ENDM
+
   ENDC ; UTIL_INC
