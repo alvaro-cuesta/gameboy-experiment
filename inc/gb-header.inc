@@ -13,10 +13,10 @@ ENDR
 ENDM
 
 PADDED_TITLE : MACRO ; up to 15 bytes (16th byte = CGB flag, we'll respect that)
-TitleStart\@:
+.titleStart\@:
   db \1  ; title
-TitleEnd\@:
-REPT 15 - (TitleEnd\@ - TitleStart\@)
+.titleEnd\@:
+REPT 15 - (.titleEnd\@ - .titleStart\@)
   db $0
 ENDR
 ENDM
