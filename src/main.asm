@@ -3,6 +3,7 @@ INCLUDE "hardware.inc"
 INCLUDE "hardware-extra.inc"
 INCLUDE "midi-table.inc"
 INCLUDE "pseudo.inc"
+INCLUDE "util.inc"
 
   rev_Check_hardware_inc 2.8
 
@@ -73,14 +74,9 @@ Setup:
   lda [rAUD1ENV], AUDENV_DOWN | (%1111 << 4) | (%001 << 0) ; initial? + sweep?
   zeroa [rAUD1SWEEP]
 
-; LCD
-
-.waitVBlank
-  ld a, [rLY]
-  cp SCRN_Y ; Check if the LCD is past VBlank
-  jr c, .waitVBlank
-
-  zeroa [rLCDC], a
+.LCD
+  waitVBlank
+  zeroa [rLCDC]
 
 .copyFont
   ld hl, _VRAM2

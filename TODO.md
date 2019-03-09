@@ -1,4 +1,5 @@
 # Bugs
 
-- If ROM starts and a button is pressed, bad things happen
+# Features
+
 - Link Gameboys and share button states
